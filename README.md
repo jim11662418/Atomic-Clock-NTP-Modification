@@ -8,3 +8,7 @@ After connecting to a Wifi server, the ESP8266 then connects to an NTP server us
 <p align="center">ESP8266 and Clock Controller</p><br>
 <p align="center"><img src="/images/Atomic Clock NTP Modification.png"/>
 <p align="center">Connections between ESP8266 and Clock Controller</p><br>
+
+
+https://github.com/user-attachments/assets/1b09c96e-a9e4-42d7-8834-14e9ce35e0c6
+
