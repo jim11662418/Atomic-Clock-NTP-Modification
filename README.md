@@ -6,6 +6,7 @@ After connecting to WiFi, the ESP8266 then connects to an NTP server using the f
 <p align="center">'Atomix' Atomic Clock Internals</p><br>
 <p align="center"><img src="/images/Atomic Clock 2.JPG"/>
 <p align="center">ESP8266 and Clock Controller</p><br>
+The ESP8266 has three connections to the clock controller PCB (see below). One output from the ESP8266 (the sketch uses D1) connects to the 'TCO' input of the clock controller. This output replaces the connection 
 <p align="center"><img src="/images/Atomic Clock NTP Modification.png"/>
 <p align="center">Connections between ESP8266 and Clock Controller</p><br>
 
