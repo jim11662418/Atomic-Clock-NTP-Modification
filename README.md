@@ -1,2 +1,2 @@
 # Atomic-Clock-NTP-Modification
-The addition of an ESP8266 Module updates an Atomic Clock using NTP
+An ESP8266 Module and an Arduino sketch replaces the WWVB radio receiver in an Atomic Clock to synchronize the clock using NTP.
