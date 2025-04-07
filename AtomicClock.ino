@@ -11,8 +11,8 @@
 #include <ESP8266WiFi.h>   
 #include <Ticker.h>    
 
-#define WIFISSID "**********"
-#define PASSWORD "**********"
+#define WIFISSID "********"
+#define PASSWORD "********"
 
 //#define NTPSERVERNAME "time.aws.com"
 //#define NTPSERVERNAME "time.cloudflare.com"
@@ -38,10 +38,10 @@
 #define D9  3                                            // RX0 (Serial console)
 #define D10 1                                            // TX0 (Serial console) 
 
-#define ledPin   D0                                      // output to control the built-in blue LED and the green LED on the front of the clock
-#define radioPin D1                                      // simulates the output from WWVB radio receiver - goes high to indicate modulated carrier being recieved 
-#define powerPin D2                                      // input monitors the signal from the clock controller which powers up the radio receiver
-#define trigger  D3                                      // output goes low to trigger the logic analyzer
+#define ledPin      D0                                   // output to control the built-in blue LED and the green LED on the front of the clock
+#define radioPin    D1                                   // simulates the output from WWVB radio receiver - goes high to indicate modulated carrier being recieved 
+#define powerPin    D2                                   // input monitors the signal from the clock controller which powers up the radio receiver
+#define triggerPin  D3                                   // output goes low to trigger the logic analyzer
 
 // Global time variables
 time_t NOW;
@@ -56,13 +56,13 @@ Ticker ledTimer;                                         // turns the LED off af
 
 void setup() {
 
-  pinMode(powerPin,INPUT); 
-  pinMode(ledPin,OUTPUT);
+  pinMode(powerPin,INPUT);
+  pinMode(ledPin,OUTPUT); 
   digitalWrite(ledPin,HIGH);
   pinMode(radioPin,OUTPUT);
   digitalWrite(radioPin,LOW);
-  pinMode(trigger,OUTPUT);
-  digitalWrite(trigger,HIGH);
+  pinMode(triggerPin,OUTPUT);
+  digitalWrite(triggerPin,HIGH);
   
   Serial.begin(115200);  
   unsigned long waitTime = millis()+500;
@@ -75,14 +75,7 @@ void setup() {
 
   ConnectWiFi();
   initNTP();
-  Serial.println("Local time now is "+dateTimeStr(NOW)); // prints current date with default format dd mm yyyy hh:mm:ss
-
-  if (DST_today())
-    Serial.println("DST is in effect today");
-
-  if (DST_tomorrow())
-    Serial.println("DST will be in effect tomorrow");
-
+  Serial.println("Local time now is "+dateTimeStr(NOW));
   Serial.println("setup() done\n");
 }
 
@@ -99,15 +92,15 @@ void loop() {
     dofy = getDayofYear(gmtDay,gmtMonth,gmtYear);        // day of the year
 
 // Each minute, WWVB broadcasts the current time in a binary-coded decimal format based on the IRIG timecode.
-// Markers are sent during seconds 0, 9, 19, 29, 39, 49 and 59 of each minute. Thus, the start of the second of two consecutive
-// markers indicates the top of the minute, and serves as the on-time marker for the next frame of time code. Markers are important
-// to allow receivers to properly frame the time code.
-// There are 11 unused bits, transmitted as binary 0.
-// The remaining 42 bits, zeros and ones, carry the binary time code and other information.
+// Markers are sent during seconds 0, 9, 19, 29, 39, 49 and 59 of each minute. Thus, the start of the second of 
+// two consecutive markers indicates the top of the minute, and serves as the on-time marker for the next frame of
+// time code. Markers are important to allow receivers to properly frame the time code. There are 11 unused bits, 
+// transmitted as binary 0. The remaining 42 bits, zeros and ones, carry the binary time code and other information.
+// see https://www.nist.gov/pml/time-and-frequency-division/time-distribution/radio-station-wwvb/wwvb-time-code-format
 
     switch (gmtSecond) {
        case 0:
-          digitalWrite(trigger,LOW);                     // trigger the logic analyzer
+          digitalWrite(triggerPin,LOW);                  // trigger the logic analyzer
           marker();                                      // send 'marker'
           break;
        case 1:
@@ -293,6 +286,8 @@ void loop() {
 
 //------------------------------------------------------------------------
 // connect to WiFi server
+// the green LED flashes once every 1/4 second while attempting to connect.
+// if unable to connect after 60 seconds, restart the ESP8266.
 //-------------------------------------------------------------------------
 void ConnectWiFi() {
   Serial.printf("\nConnecting to %s",WIFISSID);
@@ -306,8 +301,10 @@ void ConnectWiFi() {
     if (currentMillis>previousMillis) {                  // if 1 millisecond has elapsed...
       previousMillis=currentMillis; 
       if (++waitTime>60000) ESP.restart();               // if WiFi not connected after 60 seconds, restart the ESP8266      
-      if (waitTime%500==0) {                             // every 500 milliseconds...
-        Serial.print(".");                               // print '.'
+      if (waitTime%500==0) Serial.print(".");            // every 500 milliseconds print '.'
+      if (waitTime%250==0) {
+        digitalWrite(ledPin,LOW);                        // flash the green LED every 250mS
+        ledTimer.once_ms(20,outputsOFF);                 // turn off the LED after 20mS
       }
     }
   }  
@@ -316,6 +313,8 @@ void ConnectWiFi() {
 
 //------------------------------------------------------------------------
 // connect to the NTP server
+// the green LED flashes once every second while attempting to connect.
+// if unable to connect after 60 seconds, restart the ESP8266.
 //-------------------------------------------------------------------------
 void initNTP() {
   Serial.printf("\nConnecting to %s",NTPSERVERNAME);
@@ -329,8 +328,10 @@ void initNTP() {
     if (currentMillis>previousMillis) {                  // if 1 millisecond has elapsed...
       previousMillis=currentMillis;   
       if (++waitTime>60000) ESP.restart();               // if not connected to NTP server after 60 seconds, restart the ESP8266      
-      if (waitTime%500==0) {                             // every 500 milliseconds...
-        Serial.print(".");                               // print '.'
+      if (waitTime%500==0) Serial.print(".");            // every 500 milliseconds print '.'
+      if (waitTime%1000==0) {
+        digitalWrite(ledPin,LOW);                        // flash the green LED once every second
+        ledTimer.once_ms(20,outputsOFF);                 // turn off the LED after 20mS
       }
    }
   }
@@ -362,7 +363,7 @@ void getGMTtime() {
 }
 
 //------------------------------------------------------------------------
-// return local date and time with format mm dd yyyy hh:mm:ss
+// return local date and time with format hh:mm:ss mm/dd/yyyy
 //-------------------------------------------------------------------------
 String dateTimeStr(time_t epochtime) {
     tm *lt;
@@ -426,6 +427,7 @@ int getDayofYear(int day,int month, int year){
 // So a snapshot of the WWVB time code signal under perfect reception looks like a series of 200, 500 and 800
 // millisecond pulses at a 1 Hz rate. Most WWVB receiver modules output logic high when carrier power is 
 // reduced and logic low when the WWVB signal is at its normal full power.
+// see https://en.wikipedia.org/wiki/WWVB
 
 //------------------------------------------------------------------------
 // generate 800ms 'marker' bit
@@ -433,8 +435,7 @@ int getDayofYear(int day,int month, int year){
 void marker() {
    char buff[2];
    digitalWrite(radioPin,HIGH);   
-   if (!digitalRead(powerPin))
-      digitalWrite(ledPin,LOW);                          // flash the green LED only if the radio receiver is powered up (powerPin input is LOW)
+   if (!digitalRead(powerPin)) digitalWrite(ledPin,LOW); // flash the green LED only if the radio receiver is powered up (powerPin input is LOW)
    ledTimer.once_ms(800,outputsOFF);                     // turn the LED, radio and trigger outputs off after 800mS   
    sprintf(buff,"%2d",gmtSecond);   
    Serial.print(buff);   
@@ -447,8 +448,7 @@ void marker() {
 void one() {
    char buff[2];
    digitalWrite(radioPin,HIGH);
-   if (!digitalRead(powerPin)) 
-      digitalWrite(ledPin,LOW);                          // flash the green LED only if the radio receiver is powered up (powerPin input is LOW)
+   if (!digitalRead(powerPin)) digitalWrite(ledPin,LOW); // flash the green LED only if the radio receiver is powered up (powerPin input is LOW)
    ledTimer.once_ms(500,outputsOFF);                     // turn the LED, radio and trigger outputs off after 500mS    
    sprintf(buff,"%2d",gmtSecond);
    Serial.print(buff);   
@@ -461,8 +461,7 @@ void one() {
 void zero() {
    char buff[2];
    digitalWrite(radioPin,HIGH); 
-   if (!digitalRead(powerPin))
-      digitalWrite(ledPin,LOW);                          // flash the green LED only if the radio receiver is powered up (powerPin input is LOW)
+   if (!digitalRead(powerPin)) digitalWrite(ledPin,LOW); // flash the green LED only if the radio receiver is powered up (powerPin input is LOW)
    ledTimer.once_ms(200,outputsOFF);                     // turn the LED, radio and trigger outputs off after 200mS     
    sprintf(buff,"%2d",gmtSecond);
    Serial.print(buff);   
@@ -475,5 +474,5 @@ void zero() {
 void outputsOFF(){
    digitalWrite(radioPin,LOW);
    digitalWrite(ledPin,HIGH);                          
-   digitalWrite(trigger,HIGH);
+   digitalWrite(triggerPin,HIGH);
 }
