@@ -3,7 +3,10 @@ The problematic WWVB radio receiver inside the atomic clock is removed and repla
 
 After connecting to WiFi, the ESP8266 then connects to an NTP server. Once it's synced with the NTP server, the ESP8266 sends a digital time signal to the clock controller that mimics the signal the controller would recieve from its radio. Thus the clock controller thinks that it's receiving the WWVB time signal from Ft. Collins CO. The ESP8266 flashes an LED on the face of the clock as a visual indication.
 
-https://github.com/user-attachments/assets/1b09c96e-a9e4-42d7-8834-14e9ce35e0c6
+
+https://github.com/user-attachments/assets/3439c81a-85bc-4c9b-a2b1-a6189ed5eb70
+
+
 <p align="center">The 'WAVE' icon on the clock face stops flashing when the clock is synced</p><br>
 
 <p align="center"><img src="/images/Atomic Clock 1.JPG"/>
