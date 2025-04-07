@@ -11,7 +11,7 @@ https://github.com/user-attachments/assets/3439c81a-85bc-4c9b-a2b1-a6189ed5eb70
 <p align="center">'Atomix' Atomic Clock Internals</p><br>
 
 <p align="center"><img src="/images/Atomic Clock 5.JPEG"/>
-<p align="center">'Receiver and Antenna Removed from Clock</p><br>
+<p align="center">WWVB Receiver and Antenna Removed from Clock</p><br>
 
 <p align="center"><img src="/images/Atomic Clock 2.JPG"/>
 <p align="center">ESP8266 and Clock Controller</p><br>
