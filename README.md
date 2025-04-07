@@ -5,8 +5,6 @@ After connecting to WiFi, the ESP8266 then connects to an NTP server. Once it's 
 
 
 https://github.com/user-attachments/assets/3439c81a-85bc-4c9b-a2b1-a6189ed5eb70
-
-
 <p align="center">The 'WAVE' icon on the clock face stops flashing when the clock is synced</p><br>
 
 <p align="center"><img src="/images/Atomic Clock 1.JPG"/>
