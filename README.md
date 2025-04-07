@@ -17,5 +17,5 @@ https://github.com/user-attachments/assets/5a63e140-8412-42de-95e4-2bb3fc324b43
 
 
 https://github.com/user-attachments/assets/1b09c96e-a9e4-42d7-8834-14e9ce35e0c6
-<p align="center">The Atomic Clock being updated</p><br>
+<p align="center">The 'WAVE' icon on the clock face stops flashing when the clock is synced</p><br>
 
