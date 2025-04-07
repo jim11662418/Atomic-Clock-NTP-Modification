@@ -1,5 +1,5 @@
 # Atomic Clock NTP Modification
-The problematic WWVB radio receiver inside the atomic clock is removed and replaced with an ESP8266 Module and an Arduino sketch which synchronize the clock using the Network Time Protocol.
+The problematic WWVB radio receiver inside an atomic clock is removed and replaced with an ESP8266 Module and an Arduino sketch which synchronize the clock using the Network Time Protocol. Although the details show here are for an 'Atomix' brand atomic clock, this hack should be applicable to many clocks that use the older amplitude modulated format.
 
 After connecting to WiFi, the ESP8266 then connects to an NTP server. Once it's synced with the NTP server, the ESP8266 sends a digital time signal to the clock controller that mimics the signal the controller would recieve from its radio. Thus the clock controller thinks that it's receiving the WWVB time signal from Ft. Collins CO. The ESP8266 flashes an LED on the face of the clock as a visual indication.
 
