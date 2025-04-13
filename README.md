@@ -21,6 +21,8 @@ There are three connections between the ESP8266 and the clock controller PCB (se
 <br><p align="center"><img src="/images/Atomic Clock NTP Modification.png"/>
 <p align="center">Connections between ESP8266 and Clock Controller</p><br>
 
+# Version 2
+
 https://github.com/user-attachments/assets/5a63e140-8412-42de-95e4-2bb3fc324b43
 <p align="center">Monitoring the first 30 seconds of the time signal output from the ESP8266 to the clock controller</p><br>
 
