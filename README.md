@@ -35,7 +35,7 @@ In version 2 of the modification the goal was to make the ESP8266 run from the c
 <p align="center">ESP-01 Mounted on a Piece of Perfboard</p><br>
 
 <p align="center"><img src="/images/Atomic Clock NTP Modification V2.0.png"/>
-<p align="center">Connections between ESP-01 and the 'Atomix' Clock Controller. Note the use of a reistor, capacitor and CD4049 CMOS Hex Inverter to generate a 'RST' signal to wake the ESP-01 from Deep Sleep.</p><br>
+<p style="text-align:justify;">Connections between ESP-01 and the 'Atomix' Clock Controller. Note the use of a reistor, capacitor and CD4049 CMOS Hex Inverter to generate a 'RST' signal to wake the ESP-01 from Deep Sleep.</p><br>
 
 https://github.com/user-attachments/assets/5a63e140-8412-42de-95e4-2bb3fc324b43
 <p align="center">Monitoring the first 30 seconds of the time signal output from the ESP8266 to the clock controller</p><br>
