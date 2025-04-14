@@ -23,21 +23,21 @@ There are three connections between the ESP8266 and the clock controller PCB (se
 
 # Version 2
 
-In version 2 of the modification the project's hardware was completely revamped. The goal was to make the ESP8266 run from the clock's 2 AA batteries instead of requiring an external connection for power. To that end the original power hungry RobotDyn WiFi NodeM ESP8266 module was replaced with a more frugal ESP-01. The red LED on the ESP-01 module that lights up to indicate power is applied was removed to reduce current consumption even further. Sadly, the flashing LED on the face of the clock was abandoned also.
+In version 2 of the modification the project's hardware was completely revamped. The goal was to make the ESP8266 run from the clock's 2 AA batteries instead of requiring an external connection for power. To that end the power hungry RobotDyn WiFi NodeM ESP8266 module was replaced with a more frugal ESP-01 module. The red LED on the ESP-01 module that lights up to indicate power is applied was removed to reduce current consumption. Sadly, the flashing LED on the face of the clock was also abandoned.
 
-The revised sketch (AtomicClock2.ino) puts the the ESP8266 module into 'Deep Sleep' mode. The ESP8266 wakes from Deep Sleep when the clock controller pulls its 'PON' line low to turn on the radio looking for a signal from WWVB. The ESP8266 wakes up, connects to WiFi, connects to the NTP server, sends the time data to the clock controller and then returns to deep sleep. The whole process happens at midnight and takes but a few minutes.
+The revised sketch (AtomicClock2.ino) puts the the ESP8266 module into 'Deep Sleep' mode. The ESP8266 wakes from Deep Sleep when the clock controller pulls its 'PON' line low looking for a radio signal from WWVB. The ESP8266 wakes up, connects to WiFi, connects to the NTP server, sends the time data to the clock controller and then returns to deep sleep. The whole process happens at midnight and takes but a few minutes.
 
 <p align="center"><img src="/images/Atomic Clock 6.JPG"/>
 <p align="center">'Atomix' Atomic Clock Internals Version 2</p><br>
 
 <p align="center"><img src="/images/Atomic Clock 7.JPG"/>
-<p align="center">ESP-01 and 'Atomic' clock controller</p><br>
+<p align="center">ESP-01 and 'Atomix' clock controller</p><br>
 
 <p align="center"><img src="/images/Atomic Clock 8.JPG"/>
 <p align="center">ESP-01 Mounted on a Piece of Perfboard</p><br>
 
 <p align="center"><img src="/images/Atomic Clock NTP Modification V2.0.png"/>
-<p style="text-align:justify;">Connections between ESP-01 and the 'Atomix' Clock Controller. Note the use of a resistor, capacitor and CD4049 CMOS Hex Inverter to generate a 'RST' signal to wake the ESP-01 from Deep Sleep.</p><br>
+<p style="text-align:justify;">Connections between ESP-01 and the 'Atomix' clock controller. Note the use of a resistor, capacitor and CD4049 CMOS Hex Inverter to generate a 'RST' signal to wake the ESP-01 from Deep Sleep mode.</p><br>
 
 https://github.com/user-attachments/assets/5a63e140-8412-42de-95e4-2bb3fc324b43
 <p align="center">Monitoring the first 30 seconds of the time signal output from the ESP8266 to the clock controller</p><br>
