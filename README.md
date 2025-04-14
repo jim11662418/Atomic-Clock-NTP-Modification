@@ -23,9 +23,9 @@ There are three connections between the ESP8266 and the clock controller PCB (se
 
 # Version 2
 
-In version 2 of the modification the project's hardware was completely revamped. The goal was to make the ESP8266 run from the clock's 2 AA batteries instead of requiring an external connection for power. To that end the power hungry RobotDyn WiFi NodeM ESP8266 module was replaced with a more frugal ESP-01 module. The red LED on the ESP-01 module that lights up to indicate power is applied was removed to reduce current consumption. Sadly, the flashing LED on the face of the clock was also abandoned.
+In version 2 of the modification the project's hardware was completely revamped. The goal was to make the ESP8266 run from the clock's 2 AA batteries instead of requiring an external connection for power. To that end the power hungry RobotDyn WiFi NodeM ESP8266 module was replaced with a more frugal ESP-01 module. The red LED on the ESP-01 module that lights up to indicate power is applied and the flashing green LED on the face of the clock were removed to reduce current consumption.
 
-The revised sketch (AtomicClock2.ino) puts the the ESP8266 module into 'Deep Sleep' mode when the 'PON' input is high. The ESP8266 wakes from Deep Sleep when the clock controller pulls the 'PON' line low looking for a radio signal from WWVB. The ESP8266 wakes up, connects to WiFi, connects to the NTP server, sends the time data to the clock controller and then, when the clock controller signals that it's been updated by setting the 'PON' line high, returns to deep sleep. The whole process happens at midnight and takes but a few minutes.
+The revised sketch (AtomicClock2.ino) puts the the ESP8266 module into 'Deep Sleep' mode when the 'PON' input from the clock controller is high. The ESP8266 wakes from deep sleep when the clock controller pulls the 'PON' line low looking for a radio signal from WWVB. The ESP8266 wakes up, connects to WiFi, interrogates the NTP server, sends the time data to the clock controller and then, when the clock controller signals that it's been updated by setting the 'PON' input high, returns to deep sleep. The whole process happens at midnight and takes but a few minutes.
 
 <p align="center"><img src="/images/Atomic Clock 6.JPG"/>
 <p align="center">'Atomix' Atomic Clock Internals Version 2</p><br>
