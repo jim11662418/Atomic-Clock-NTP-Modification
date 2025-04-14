@@ -23,7 +23,9 @@ There are three connections between the ESP8266 and the clock controller PCB (se
 
 # Version 2
 
-In version 2 of the modification the goal was to make the ESP8266 run from the clock's 2 AA batteries instead of requiring an external connection for power. To that end the original power hungry RobotDyn WiFi NodeM ESP8266 module was replaced with a more frugal ESP-01. The red LED on the ESP-01 that lights up to indicate power is applied was removed to reduce current consumption even further. The sketch (AtomicClock2.ino) puts the ESP8266 into Deep Sleep mode. The ESP8266 wakes from Deep Sleep when the clock controller pulls its 'PON' line low to turn on its radio looking for a signal from WWVB. The ESP8266 wakes up, connects to WiFi, connects to the NTP server, sends the time data to the clock controller and then returns to deep sleep. The whole process happens at midnight and takes but a few minutes.
+In version 2 of the modification the project's hardware was completely revamped. The goal was to make the ESP8266 run from the clock's 2 AA batteries instead of requiring an external connection for power. To that end the original power hungry RobotDyn WiFi NodeM ESP8266 module was replaced with a more frugal ESP-01. The red LED on the ESP-01 module that lights up to indicate power is applied was removed to reduce current consumption even further. Sadly, the flashing LED on the face of the clock was abandoned also.<br>
+
+The revised sketch (AtomicClock2.ino) makes use of the ESP8266's 'Deep Sleep' mode. The ESP8266 wakes from Deep Sleep when the clock controller pulls its 'PON' line low to turn on its radio looking for a signal from WWVB. The ESP8266 wakes up, connects to WiFi, connects to the NTP server, sends the time data to the clock controller and then returns to deep sleep. The whole process happens at midnight and takes but a few minutes.
 
 <p align="center"><img src="/images/Atomic Clock 6.JPG"/>
 <p align="center">'Atomix' Atomic Clock Internals Version 2</p><br>
