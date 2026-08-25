@@ -1,20 +1,5 @@
-//-------------------------------------------------------------------------------------------------------------------------------------
-// Copyright 2025 Jim Loos
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files
-// (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge,
-// publish, distribute, sub-license, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do
-// so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-// OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
-// IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-//-------------------------------------------------------------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------------------------------------------------------------
-// This sketch uses an generic ESP-01 ESP8266 module to replace the radio reciever in an 'Atomic" clock.
+//--------------------------------------------------------------------------
+// This sketch uses an generic ESP-01 ESP8266 module to replace the radio reciever in a radio controlled 'Atomic" clock.
 // The sketch:
 //   1. goes into deep sleep until the clock controller looks for a radio signal from WWVB
 //   2. wakes from deep sleep
@@ -22,7 +7,9 @@
 //   4. sends a digital signal to the clock controller that makes the controller think
 //      that it's receiving the radio receiver's WWVB time signal from Ft. Collins CO.
 //   6. goes back into deep sleep after the clock has been updated and the radio is turned off
-//--------------------------------------------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------
+#define La_Crosse
+//#define Atomix
 
 #include <ESP8266WiFi.h>   
 #include <Ticker.h>    
@@ -69,21 +56,21 @@ void setup() {
   digitalWrite(TCOpin,LOW);
   pinMode(LEDpin,OUTPUT);
   digitalWrite(LEDpin,HIGH);
-
   
-  Serial.begin(115200,SERIAL_8N1,SERIAL_TX_ONLY);  
-  unsigned long waitTime = millis()+500;
-  while(millis() < waitTime)yield();                     // wait one half second for the serial port
-  Serial.println("\n\nNTP Atomic Clock Controller V2.0");
-  Serial.printf("Sketch size: %u\n",ESP.getSketchSize());
-  Serial.printf("Free size: %u\n",ESP.getFreeSketchSpace());
-  Serial.print(ESP.getResetReason());
-  Serial.println(" Reset");
+  //Serial.begin(115200,SERIAL_8N1,SERIAL_TX_ONLY);  
+  //unsigned long waitTime = millis()+500;
+  //while(millis() < waitTime)yield();                     // wait one half second for the serial port
+  //Serial.println("\n\nNTP Atomic Clock Controller V2.0");
+  //Serial.printf("Sketch size: %u\n",ESP.getSketchSize());
+  //Serial.printf("Free size: %u\n",ESP.getFreeSketchSpace());
+  //Serial.print(ESP.getResetReason());
+  //Serial.println(" Reset");
 
   ConnectWiFi();
   initNTP();
-  Serial.println("Local time now is "+dateTimeStr(NOW));
-  Serial.println("setup() done\n");
+  
+  //Serial.println("Local time now is "+dateTimeStr(NOW));
+  //Serial.println("setup() done\n");
 }
 
 void loop() {
@@ -91,7 +78,7 @@ void loop() {
   int dofy,yr;
   
   if (digitalRead(PONpin)) {                             // if the clock controller has turned the radio off...
-    Serial.println("Deep sleep...");                     
+    //Serial.println("Deep sleep...");                     
     ESP.deepSleep(0);                                    // go to sleep
    }
 
@@ -101,7 +88,7 @@ void loop() {
 
     getGMTtime();                                        // update time vars needed below
     yr = gmtYear-2000;                                   // 2 digit year
-    dofy = getDayofYear(gmtDay,gmtMonth,gmtYear);        // day of the year
+    dofy = getDayofYear(gmtDay,gmtMonth);                // day of the year
 
 // Each minute, WWVB broadcasts the current time in a binary-coded decimal format based on the IRIG timecode.
 // Markers are sent during seconds 0, 9, 19, 29, 39, 49 and 59 of each minute. Thus, the start of the second of 
@@ -112,7 +99,7 @@ void loop() {
 
     switch (gmtSecond) {
        case 0:
-          Serial.println("\nUTC: "+gmtTimeStr(NOW));
+          //Serial.println("\nUTC: "+gmtTimeStr(NOW));
           marker();                                      // send 'marker'
           break;
        case 1:
@@ -298,15 +285,25 @@ void loop() {
 
 //------------------------------------------------------------------------
 // connect to WiFi server
-// the green LED flashes once every 1/4 second while attempting to connect.
 // if unable to connect after 60 seconds, restart the ESP8266.
+//
+// NOTE: The router gets your hostname from the dhcp request. 
+// If the interface is set to static it never makes this request.
 //-------------------------------------------------------------------------
 void ConnectWiFi() {
-  Serial.printf("\nConnecting to %s",WIFISSID);
   unsigned int waitTime=0;  
   unsigned long previousMillis=0;
-  unsigned long starttime=millis();
-  WiFi.setHostname("Atomic Clock");
+
+  WiFi.persistent(false);                                // prevent the ESP from reading WiFi settings from memory
+  WiFi.mode(WIFI_STA );                                  // WiFi mode. STA to connect to existing network
+
+  #ifdef Atomix
+     WiFi.setHostname("Atomix-RCC");                     // Atomix radio controlled clock
+  #else
+     WiFi.setHostname("La_Crosse-RCC");                  // La Crosse radio controlled clock                     
+  #endif 
+  
+  //Serial.printf("\nConnecting to %s",WIFISSID); 
   WiFi.begin(WIFISSID,PASSWORD);
   while (WiFi.status() != WL_CONNECTED) {                // while waiting to connect to WiFi...
     yield();    
@@ -314,22 +311,20 @@ void ConnectWiFi() {
     if (currentMillis>previousMillis) {                  // if 1 millisecond has elapsed...
       previousMillis=currentMillis; 
       if (++waitTime>60000) ESP.restart();               // if WiFi not connected after 60 seconds, restart the ESP8266      
-      if (waitTime%500==0) Serial.print(".");            // every 500 milliseconds print '.'
+      //if (waitTime%500==0) Serial.print(".");            // every 500 milliseconds print '.'
     }
   }  
-  Serial.printf("\nConnection to %s took %s ms\n",WIFISSID,String(millis()-starttime));
 }
 
 //------------------------------------------------------------------------
 // connect to the NTP server
-// the green LED flashes once every second while attempting to connect.
 // if unable to connect after 60 seconds, restart the ESP8266.
 //-------------------------------------------------------------------------
 void initNTP() {
-  Serial.printf("\nConnecting to %s",NTPSERVERNAME);
+  //Serial.printf("\nConnecting to %s",NTPSERVERNAME);
   unsigned int waitTime=0;  
   unsigned long previousMillis=0;
-  unsigned long starttime=millis();  
+
   configTime(MYTZ,NTPSERVERNAME);
   while((NOW=time(nullptr)) < 1702684800) {              // while waiting for time to be set to later than 00:00:00 12/16/2023 GMT...
     yield();
@@ -337,20 +332,9 @@ void initNTP() {
     if (currentMillis>previousMillis) {                  // if 1 millisecond has elapsed...
       previousMillis=currentMillis;   
       if (++waitTime>60000) ESP.restart();               // if not connected to NTP server after 60 seconds, restart the ESP8266      
-      if (waitTime%500==0) Serial.print(".");            // every 500 milliseconds print '.'
+      //if (waitTime%500==0) Serial.print(".");          // every 500 milliseconds print '.'
     }
   }
-  Serial.printf("\nConnection to %s took %s ms\n",NTPSERVERNAME,String(millis()-starttime));  
-}
-
-//------------------------------------------------------------------------
-// The standard value for the NTP polling interval is one hour. This value 
-// can be changed by adding the following function definition to the sketch. 
-// It suffices that the definition is available in the sketch, the library 
-// will call the function automatically.
-//------------------------------------------------------------------------
-uint32_t sntp_update_delay_MS_rfc_not_less_than_15000() {
-  return 10 * 60 * 1000UL;                               // 10 minutes
 }
 
 //------------------------------------------------------------------------
@@ -370,24 +354,24 @@ void getGMTtime() {
 //------------------------------------------------------------------------
 // return local date and time with format hh:mm:ss mm/dd/yyyy
 //-------------------------------------------------------------------------
-String dateTimeStr(time_t epochtime) {
-    tm *lt;
-    lt = localtime(&epochtime);
-    char buff[30];
-    strftime(buff,30,"%H:%M:%S %m/%d/%Y",lt);
-    return buff;
-}
+//String dateTimeStr(time_t epochtime) {
+//    tm *lt;
+//    lt = localtime(&epochtime);
+//    char buff[30];
+//    strftime(buff,30,"%H:%M:%S %m/%d/%Y",lt);
+//    return buff;
+//}
 
 //------------------------------------------------------------------------
 // return GMT time with format hh:mm
 //-------------------------------------------------------------------------
-String gmtTimeStr(time_t epochtime) {
-    tm *lt;
-    lt = gmtime(&epochtime);
-    char buff[10];
-    strftime(buff,10,"%H:%M",lt);
-    return buff;
-}
+//String gmtTimeStr(time_t epochtime) {
+//    tm *lt;
+//    lt = gmtime(&epochtime);
+//    char buff[10];
+//    strftime(buff,10,"%H:%M",lt);
+//    return buff;
+//}
 
 //------------------------------------------------------------------------
 // return true if DST is in effect today
@@ -422,7 +406,7 @@ boolean is_leap_year() {
 //------------------------------------------------------------------------
 // return the day of the year
 //-------------------------------------------------------------------------
-int getDayofYear(int day,int month, int year){
+int getDayofYear(int day,int month){
    int mo[12] = {31,28,31,30,31,30,31,31,30,31,30,31};
    int i;
    int dofy=0;
@@ -449,53 +433,53 @@ int getDayofYear(int day,int month, int year){
 // generate 800ms 'marker' bit
 //-------------------------------------------------------------------------
 void marker() {
-   char buff[2];
-   digitalWrite(TCOpin,HIGH); 
-   pulseTimer.once_ms(800,pulseOFF);                  // turn off the TCO output after 800mS   
-   digitalWrite(LEDpin,LOW);    
-   LEDTimer.once_ms(50,LEDoff);                       // turn off the green LED after 50mS      
-   sprintf(buff,"%2d",gmtSecond);   
-   Serial.print(buff);   
-   Serial.println(" M");
+   digitalWrite(TCOpin,HIGH);                         // turn the TCO output on
+   pulseTimer.once_ms(800,pulseOFF);                  // turn the TCO output off after 800mS   
+   digitalWrite(LEDpin,LOW);                          // turn the green LED on
+   LEDTimer.once_ms(50,LEDoff);                       // turn the green LED off after 50mS      
+   //char buff[2];
+   //sprintf(buff,"%2d",gmtSecond);   
+   //Serial.print(buff);   
+   //Serial.println(" M");
 }
 
 //------------------------------------------------------------------------
 // generate 500ms 'one' bit
 //-------------------------------------------------------------------------
 void one() {
-   char buff[2];
-   digitalWrite(TCOpin,HIGH);
-   pulseTimer.once_ms(500,pulseOFF);                  // turn off the TCO output after 500mS 
-   digitalWrite(LEDpin,LOW);       
-   LEDTimer.once_ms(50,LEDoff);                       // turn off the green LED after 50mS         
-   sprintf(buff,"%2d",gmtSecond);
-   Serial.print(buff);   
-   Serial.println(" 1");   
+   digitalWrite(TCOpin,HIGH);                         // turn the TCO output on
+   pulseTimer.once_ms(500,pulseOFF);                  // turn the TCO output off after 500mS 
+   digitalWrite(LEDpin,LOW);                          // turn the green LED on
+   LEDTimer.once_ms(50,LEDoff);                       // turn the green LED off after 50mS         
+   //char buff[2];   
+   //sprintf(buff,"%2d",gmtSecond);
+   //Serial.print(buff);   
+   //Serial.println(" 1");   
 }
 
 //------------------------------------------------------------------------
 // generate 200ms 'zero' bit
 //-------------------------------------------------------------------------
 void zero() {
-   char buff[2];
-   digitalWrite(TCOpin,HIGH); 
-   pulseTimer.once_ms(200,pulseOFF);                  // turn off the TCO output after 200mS 
-   digitalWrite(LEDpin,LOW);       
-   LEDTimer.once_ms(50,LEDoff);                       // turn off the green LED after 50mS         
-   sprintf(buff,"%2d",gmtSecond);
-   Serial.print(buff);   
-   Serial.println(" 0");   
+   digitalWrite(TCOpin,HIGH);                         // turn the TCO output on
+   pulseTimer.once_ms(200,pulseOFF);                  // turn the TCO output off after 200mS 
+   digitalWrite(LEDpin,LOW);                          // turn the green LED on
+   LEDTimer.once_ms(50,LEDoff);                       // turn the green LED off after 50mS         
+   //char buff[2];   
+   //sprintf(buff,"%2d",gmtSecond);
+   //Serial.print(buff);   
+   //Serial.println(" 0");   
 }
 
 //------------------------------------------------------------------------
-// Ticker callback that turns off the TCOpin output
+// Ticker callback that turns the TCOpin output off
 //-------------------------------------------------------------------------
 void pulseOFF(){
    digitalWrite(TCOpin,LOW);
 }
 
 //------------------------------------------------------------------------
-// Ticker callback that turns off the green LED
+// Ticker callback that turns the green LED off
 //-------------------------------------------------------------------------
 void LEDoff(){
    digitalWrite(LEDpin,HIGH);
