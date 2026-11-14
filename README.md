@@ -45,7 +45,7 @@ The photo above shows details of a 'SkyScan' Atomic Clock on which the WWVB rece
 
 
 https://github.com/user-attachments/assets/5a63e140-8412-42de-95e4-2bb3fc324b43
-<p align="center">Monitoring the first 30 seconds of the time signal output from the ESP8266 to the clock controller</p><br>
+<br><p align="center">Monitoring the first 30 seconds of the time signal output from the ESP8266 to the clock controller</p><br>
 
 
 
