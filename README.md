@@ -41,6 +41,7 @@ The revised sketch (AtomicClock2.ino) puts the the ESP8266 module into 'Deep Sle
 
 <p align="center"><img src="/images/Atomic Clock 9.JPG"/>
 <p align="center">Details of a 'SkyScan" Atomic Clock PCB</p><br>
+The photo above shows details of a 'SkyScan' Atomic Clock on which the WWVB receiver (the blob on the left) and the Clock Controller (the blob on the right) are both mounted on one printed circuit board. There are two PCB traces connecting the two blobs. It take a bit of probing with an oscilloscope to identify which of the two traces is the 'PON' line and which is the 'TCO' line. The 'PON' line starts out HIGH and goes LOW when the clock controller starts searching for a signal from WWVB. The 'TCO' line looks like the signal in the video below. Once identified, the 'TCO' trace has been cut to isolate the receiver from the clock controller.
 
 https://github.com/user-attachments/assets/5a63e140-8412-42de-95e4-2bb3fc324b43
 <p align="center">Monitoring the first 30 seconds of the time signal output from the ESP8266 to the clock controller</p><br>
